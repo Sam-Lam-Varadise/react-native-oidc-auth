@@ -8,19 +8,19 @@ import {
 import {Platform} from 'react-native';
 import axios from 'axios';
 import {
-  encodeFormData,
-  tracingLog,
-  AuthConfiguration,
   AuthorizeResult,
+  encodeFormData,
   EndSessionConfiguration,
   IAppAuth,
-  TokenResponse,
   LogoutConfiguration,
   RefreshConfiguration,
   RefreshResult,
+  TokenResponse,
+  tracingLog,
   User,
   UserInfoConfiguration,
 } from 'react-native-oidc-auth-core';
+import {ExpoAuthConfiguration} from '@/interface/expo-auth-configuration';
 
 export class OidcAuthExpo implements IAppAuth {
   private discoveryDocument: DiscoveryDocument | null = null;
@@ -41,7 +41,7 @@ export class OidcAuthExpo implements IAppAuth {
     return this.discoveryDocument;
   }
 
-  async authorize(config: AuthConfiguration): Promise<AuthorizeResult> {
+  async authorize(config: ExpoAuthConfiguration): Promise<AuthorizeResult> {
     const {discoveryDocument, redirectUri, authRequest} =
       await this.initializeAuthSession(config);
 
@@ -83,7 +83,7 @@ export class OidcAuthExpo implements IAppAuth {
   }
 
   async refresh(
-    config: AuthConfiguration,
+    config: ExpoAuthConfiguration,
     refreshConfig: RefreshConfiguration,
   ): Promise<RefreshResult> {
     const discoveryDocument = await this.fetchDiscoveryDocument();
@@ -128,7 +128,7 @@ export class OidcAuthExpo implements IAppAuth {
   }
 
   async register(
-    config: AuthConfiguration,
+    config: ExpoAuthConfiguration,
     registrationPageEndpoint: string,
   ): Promise<AuthorizeResult> {
     const {discoveryDocument, redirectUri, authRequest} =
@@ -150,7 +150,7 @@ export class OidcAuthExpo implements IAppAuth {
 
   private async processAuthResult(
     result: AuthSessionResult,
-    config: AuthConfiguration,
+    config: ExpoAuthConfiguration,
     authRequest: AuthRequest,
     redirectUri: string,
   ) {
@@ -192,11 +192,11 @@ export class OidcAuthExpo implements IAppAuth {
     } as AuthorizeResult;
   }
 
-  private async initializeAuthSession(config: AuthConfiguration) {
+  private async initializeAuthSession(config: ExpoAuthConfiguration) {
     const discoveryDocument = await this.fetchDiscoveryDocument();
 
     tracingLog.debug('[EXPO APP AUTH] load auth session with config');
-    const redirectUri = makeRedirectUri();
+    const redirectUri = makeRedirectUri(config.redirectUriOptions);
     tracingLog.debug('[EXPO APP AUTH] redirect uri: ', redirectUri);
     const authRequest = await AuthSession.loadAsync(
       {
